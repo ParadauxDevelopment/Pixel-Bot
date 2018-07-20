@@ -68,14 +68,16 @@ const commands = {
     },
 
     'admin': (msg, args) => {
-        if (args.length <= 1) {
-            error("Syntax Error", "command: `admin` requires at least one argument.", msg);
-            return;
-        }
+        if (msg.member.roles.find("name", "Pixel-Admin") {
+            if (args.length <= 1) {
+                error("Syntax Error", "command: `admin` requires at least one argument.", msg);
+                return;
+            }
 
-        if (args[1] === "exit") {
-            log("ADMIN COMMAND", "Bot terminated.", msg);
-            //process.exit();
+            if (args[1] === "exit") {
+                log("ADMIN COMMAND", "Bot terminated.", msg)
+                .then(() => process.exit());
+            }
         }
     },
 
