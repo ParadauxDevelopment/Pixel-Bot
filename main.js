@@ -4,9 +4,7 @@ const config = require('./data/config.json');
 const embeds = require('./modules/embeds.js');
 const commandHandler = require('./modules/commands.js');
 const client = new Discord.Client();
-const muted = {
-
-}
+const muted = {}
 
 
 
@@ -94,6 +92,14 @@ const commands = {
             if (args.length <= 1) {
                 error("Syntax Error", "command: `dev` requires at least one argument.", msg);
             } 
+            }
+            if (args[1] === "createmuteduser") {
+                user = msg.mentions.members.first();
+                var mutee = {
+                    msg.mentions.members.first().username: msg.mentions.members.first()
+                }
+                console.log(msg.mentions.members.first())
+
             }
     }
 }
