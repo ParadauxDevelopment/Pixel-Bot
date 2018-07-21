@@ -4,6 +4,11 @@ const config = require('./data/config.json');
 const embeds = require('./modules/embeds.js');
 const commandHandler = require('./modules/commands.js');
 const client = new Discord.Client();
+const muted = {
+
+}
+
+
 
 function error(errtype, errmsg, msg) {
     errorEmbed = new Discord.RichEmbed()
@@ -68,8 +73,8 @@ const commands = {
     },
 
     'admin': (msg, args) => {
-        if (msg.member.roles.find("name", "Pixel-Admin") {
-            if (args.length <= 1) {
+        if (msg.member.roles.find("name", "Pixel-Admin")) {
+            if (args.length <= 2) {
                 error("Syntax Error", "command: `admin` requires at least one argument.", msg);
                 return;
             }
@@ -81,15 +86,16 @@ const commands = {
         }
     },
 
-    'dev': (msg.args) => {
-
-    },
-
-    'placeholder': (msg, args) => {
-        console.log(msg.author);
-        msg.channel.send(msg.author.username);
+    'dev': (msg, args) => {
+        console.log("dev")
+        console.log(args)
+        console.log(args.length)
+        if (msg.member.roles.find("name", "Pixel-Dev") || msg.author.id === config.testuser) {
+            if (args.length <= 1) {
+                error("Syntax Error", "command: `dev` requires at least one argument.", msg);
+            } 
+            }
     }
-
 }
 
 
