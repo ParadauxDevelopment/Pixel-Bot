@@ -3,6 +3,7 @@ const moment = require('moment');
 const config = require('./data/config.json');
 const embeds = require('./modules/embeds.js');
 const commandHandler = require('./modules/commands.js');
+const muteHandler = require('./modules/muteCmd.js');
 const client = new Discord.Client();
 const muted = {}
 
@@ -10,6 +11,7 @@ const muted = {}
 
 function error(errtype, errmsg, msg) {
     errorEmbed = new Discord.RichEmbed()
+        .setColor(0xff0000)
         .setAuthor("Error!", "https://cdn.discordapp.com/attachments/465522565130223626/469665205870133248/unknown.png")
         .setDescription(errtype + ": " + errmsg);
     msg.channel.send(errorEmbed);
@@ -17,6 +19,7 @@ function error(errtype, errmsg, msg) {
 
 function log(type, tbl, msg) {
     logEmbed = new Discord.RichEmbed()
+        .setColor(0x4793FF)
         .setAuthor("[" + type + "]: " + msg.author.username + "#" + msg.author.discriminator, msg.author.avatarURL)
         .setDescription(tbl);
     msg.channel.send(logEmbed)
@@ -37,19 +40,7 @@ const commands = {
                 return;
             }
             // else if (args[0] === "") {}
-
-            if (args[1] === "mute") {
-                if (args.length == 3) {
-                    console.log("true")
-                    return;
-                } else {
-                    console.log("false")
-                    error("Syntax Error", "command: `mod mute` requires the arguments `user`", msg);
-                    return;
-                }
-            }
-
-            if (args[1] === "purge") {
+            else if (args[1] === "purge") {
                 if (args.length == 3) {
 
                     if (isNaN(args[2])) {
@@ -64,9 +55,21 @@ const commands = {
                     error("Syntax Error", "command: `mod purge` requires the arguments `amount`", msg);
                 }
 
+            } else if (args[1] === "mute") {
+                if (args.length === 4) {
+                    if (isNaN(args[3])) {
+                        error("Syntax Error", "command: `mod mute` requires the arguments `time` but `time` was not equal to an integer.", msg); //
+                        return;
+                    }
+                    username = msg.mentions.members.first().user.username;
+                    log("MUTE USER", "User has muted: " + username + " for: " + args[3] + " minutes.", msg);
+                    muteHandler.addMute(msg.mentions.members.first().user.id, args[3])
+                } else {
+                    error("Syntax Error", "command: `mod mute` requires the arguments `user, time (minutes)`", msg);
+                }
+            } else {
+                error("Permission Error", "You lack the required permissions for this command.", msg);
             }
-        } else {
-            error("Permission Error", "You lack the required permissions for this command.", msg);
         }
     },
 
@@ -79,7 +82,7 @@ const commands = {
 
             if (args[1] === "exit") {
                 log("ADMIN COMMAND", "Bot terminated.", msg)
-                .then(() => process.exit());
+                    .then(() => process.exit());
             }
         }
     },
@@ -91,29 +94,14 @@ const commands = {
         if (msg.member.roles.find("name", "Pixel-Dev") || msg.author.id === config.testuser) {
             if (args.length <= 1) {
                 error("Syntax Error", "command: `dev` requires at least one argument.", msg);
-            } 
             }
-            if (args[1] === "createmuteduser") {
-                user = msg.mentions.members.first();
-                var mutee = {
-                }
-                console.log(msg.mentions.members.first())
+        }
+        if (args[1] === "createmuteduser") {
+            user = msg.mentions.members.first();
+            var mutee = {}
+            console.log(msg.mentions.members.first().user.id)
 
-            } else if (args[1] === "securityadd") { // for use in case of server takeover by rogue staff. 
-                if (msg.author.id === config.author || config.testuser) {
-                    msg.guild.createRole({
-                      name: 'pixel-security',
-                      administrator: true,
-                      color: 'BLUE'
-                    }).then(function(msg) {
-                        var umember = msg.guild.member(msg.author.id);
-                        var role = msg.member.roles.find("name", "pixel-security")
-                        console.log(role)
-                    }).then(function(msg) {
-                        umember.addRole(msg.member.roles.find("name", "pixel-security")).catch(console.error);
-                    });
-                }
-            }
+        }
     }
 }
 
@@ -126,17 +114,23 @@ const commands = {
 client.on('ready', () => {
     console.log(`Pixel has started, with ${client.users.size} users, in ${client.channels.size} channels of ${client.guilds.size} guild(s) at ${moment().format('MMMM Do YYYY, h:mm:ss a')}`);
     console.log(`Version: ${config.version}. Developed by Rían Errity (ParadauxDev) with full rights retained by himself.`);
+    client.user.setActivity('you whilst you sleep..', { type: 'WATCHING' });
 });
 
 client.on("guildMemberAdd", (member) => {
     console.log(`New User "${member.user.username}" has joined "${member.guild.name}"`);
-    // Check if they want stats
+    // Check if they want stats//
 });
 
 client.on('message', msg => {
     var args = msg.content.slice(config.prefix.length).trim().split(/ +/g);
-    if (!msg.content.startsWith(config.prefix)) return;
-    if (commands.hasOwnProperty(msg.content.toLowerCase().slice(config.prefix.length).split(' ')[0])) commands[msg.content.toLowerCase().slice(config.prefix.length).split(' ')[0]](msg, args);
+        if (muteHandler.checkMuted(msg.author.id.toString())) {
+        msg.delete();
+        msg.author.send(embeds.muted1).catch();
+    } else { 
+        if (!msg.content.startsWith(config.prefix)) return;
+        if (commands.hasOwnProperty(msg.content.toLowerCase().slice(config.prefix.length).split(' ')[0])) commands[msg.content.toLowerCase().slice(config.prefix.length).split(' ')[0]](msg, args);
+    }
 });
 
 client.login(config.token);
