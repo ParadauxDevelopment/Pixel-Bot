@@ -80,7 +80,7 @@ const commands = {
 
     'admin': (msg, args) => {
         if (msg.member.roles.find("name", "Pixel-Admin")) {
-            if (args.length <= 2) {
+            if (args.length <= 1) {
                 error("Syntax Error", "command: `admin` requires at least one argument.", msg);
                 return;
             }

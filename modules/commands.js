@@ -16,15 +16,11 @@ function log(type, tbl, msg, client) {
 }
 
 module.exports.purge = async function purge(message, args, client) {
-    message.delete(); // Let's delete the command message, so it doesn't interfere with the messages we are going to delete.
-
-    // Now, we want to check if the user has the `bot-commander` role, you can change this to whatever you want.
-    // We want to check if the argument is a number
-
-    const fetched = await message.channel.fetchMessages({limit: args[2]}); // This grabs the last number(args) of messages in the channel.
+    message.delete();
+    const fetched = await message.channel.fetchMessages({limit: args[2]}); 
     message.channel.bulkDelete(fetched)
-        .catch(error => message.channel.send(`Error: ${error}`)); // If it finds an error, it posts it into the channel.
-
+        .catch(error => message.channel.send(`Error: ${error}`));
+    config.log(fetched);
     log("MODERATOR COMMAND", "User deleted `"  + args[2] + "` messages using " + config.prefix + "mod purge.", message, client)
 }
 
