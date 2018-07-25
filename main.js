@@ -122,6 +122,8 @@ const commands = {
                     token = [];
                 } else if (args[1] === "showmute") {
                     msg.channel.send("```" + JSON.stringify(mutedUsers, null, 4) + "```");
+                } else if (args[1] === "showinfractions") {
+                    msg.channel.send("```" + JSON.stringify(infractions, null, 4) + "```");
                 }
             }
         } else {
