@@ -20,7 +20,7 @@ module.exports.purge = async function purge(message, args, client) {
     const fetched = await message.channel.fetchMessages({limit: args[2]}); 
     message.channel.bulkDelete(fetched)
         .catch(error => message.channel.send(`Error: ${error}`));
-    config.log(fetched);
+    console.log(fetched);
     log("MODERATOR COMMAND", "User deleted `"  + args[2] + "` messages using " + config.prefix + "mod purge.", message, client)
 }
 
