@@ -80,7 +80,6 @@ const commands = {
                 if (args.length === 3) {
                     user = msg.mentions.members.first().user
                     if (muteHandler.checkMuted(user.id)) {
-                        console.log("true")
                         muteHandler.removeMute(msg.mentions.members.first().user.id);
                     } else {
                         error("User Error", "User is not muted.", msg);
@@ -108,9 +107,6 @@ const commands = {
     },
 
     'dev': (msg, args) => {
-        console.log("dev")
-        console.log(args)
-        console.log(args.length)
         if (msg.member.roles.find("name", "Pixel-Dev") || msg.author.id === config.testuser) {
             if (args.length <= 1) {
                 error("Syntax Error", "command: `dev` requires at least one argument.", msg);
