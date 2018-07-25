@@ -4,6 +4,7 @@ const config = require('./data/config.json');
 const embeds = require('./modules/embeds.js');
 const commandHandler = require('./modules/commands.js');
 const muteHandler = require('./modules/muteCmd.js');
+const configHandler = require('./modules/confighandler.js')
 const client = new Discord.Client();
 const muted = {}
 
@@ -29,6 +30,10 @@ function log(type, tbl, msg) {
 const commands = {
     'info': (msg) => {
         msg.channel.send(embeds.infoCmd);
+    },
+
+    'help': (msg, args) => {
+        console.log("hello world!");
     },
 
     'mod': (msg, args) => {
@@ -94,13 +99,29 @@ const commands = {
         if (msg.member.roles.find("name", "Pixel-Dev") || msg.author.id === config.testuser) {
             if (args.length <= 1) {
                 error("Syntax Error", "command: `dev` requires at least one argument.", msg);
+                return;
+            } else {
+                if (args[1] === "sendas") {
+                    var listArgs = "";
+                    for (i = 3; i <= args.length - 1; i++) {
+                        console.log(listArgs)
+                        listArgs = listArgs + " " + (args[i]);
+                    }
+                    client.channels.get(args[2]).send(listArgs);
+                } else if (args[1] === "setconfigvalue") {
+                    config[args[2]] = args[3];
+                    console.log(config);    
+                    configHandler.writeConfig("./data/config.json", config)
+                } else if (args[1] === "showconfig") {
+                    token = config.token;
+                    config.token = "redacted";
+                    msg.channel.send("```" + JSON.stringify(config, null, 4) + "```");
+                    config.token = token;
+                    token = [];
+                }
             }
-        }
-        if (args[1] === "createmuteduser") {
-            user = msg.mentions.members.first();
-            var mutee = {}
-            console.log(msg.mentions.members.first().user.id)
-
+        } else {
+            error("Permission Error", "You lack the required permissions for this command.", msg);
         }
     }
 }
@@ -114,7 +135,9 @@ const commands = {
 client.on('ready', () => {
     console.log(`Pixel has started, with ${client.users.size} users, in ${client.channels.size} channels of ${client.guilds.size} guild(s) at ${moment().format('MMMM Do YYYY, h:mm:ss a')}`);
     console.log(`Version: ${config.version}. Developed by Rían Errity (ParadauxDev) with full rights retained by himself.`);
-    client.user.setActivity('you whilst you sleep..', { type: 'WATCHING' });
+    client.user.setActivity('you whilst you sleep..', {
+        type: 'WATCHING'
+    });
 });
 
 client.on("guildMemberAdd", (member) => {
@@ -123,11 +146,11 @@ client.on("guildMemberAdd", (member) => {
 });
 
 client.on('message', msg => {
-    var args = msg.content.slice(config.prefix.length).trim().split(/ +/g);
-        if (muteHandler.checkMuted(msg.author.id.toString())) {
+    var args = msg.content.slice(config.prefix.length).trim().split(/ +/g)
+    if (muteHandler.checkMuted(msg.author.id.toString())) {
         msg.delete();
         msg.author.send(embeds.muted1).catch();
-    } else { 
+    } else {
         if (!msg.content.startsWith(config.prefix)) return;
         if (commands.hasOwnProperty(msg.content.toLowerCase().slice(config.prefix.length).split(' ')[0])) commands[msg.content.toLowerCase().slice(config.prefix.length).split(' ')[0]](msg, args);
     }

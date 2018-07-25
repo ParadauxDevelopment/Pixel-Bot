@@ -1,4 +1,5 @@
 const Discord = require('discord.js');
+const fs = require("fs");
 const moment = require('moment');
 const config = require('../data/config.json');
 var mutedUsers = require('../data/muted-players.json');

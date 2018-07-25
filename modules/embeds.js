@@ -15,3 +15,5 @@ module.exports.muted1 = new Discord.RichEmbed()
 		.setTitle("Muted.")
 		.setDescription(`You have been muted. You are not allowed to send messages on IcePixel until 1) You're un-muted or 2) The time specified for your mute has run out.`)
 
+
+module.exports.help1 = new Discord.RichEmbed();

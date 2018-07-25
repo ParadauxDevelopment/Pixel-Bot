@@ -15,9 +15,7 @@ function log(type, tbl, msg, client) {
         client.channels.get(config.logchannel).send(logEmbed);
 }
 
-
-
-async function purge(message, args, client) {
+module.exports.purge = async function purge(message, args, client) {
     message.delete(); // Let's delete the command message, so it doesn't interfere with the messages we are going to delete.
 
     // Now, we want to check if the user has the `bot-commander` role, you can change this to whatever you want.
@@ -27,7 +25,6 @@ async function purge(message, args, client) {
     message.channel.bulkDelete(fetched)
         .catch(error => message.channel.send(`Error: ${error}`)); // If it finds an error, it posts it into the channel.
 
-    log("MODERATOR COMMAND", "User deleted `"  + args[2] + "` messages using ;mod purge.", message, client)
+    log("MODERATOR COMMAND", "User deleted `"  + args[2] + "` messages using " + config.prefix + "mod purge.", message, client)
 }
 
-exports.purge = purge;
