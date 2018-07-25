@@ -11,8 +11,6 @@ const infractionHandler = require('./modules/infractionhandler.js');
 const client = new Discord.Client();
 const muted = {}
 
-
-
 function error(errtype, errmsg, msg) {
     errorEmbed = new Discord.RichEmbed()
         .setColor(0xff0000)
@@ -35,11 +33,9 @@ const commands = {
     'info': (msg) => {
         msg.channel.send(embeds.infoCmd);
     },
-
     'help': (msg, args) => {
         console.log("hello world!");
     },
-
     'mod': (msg, args) => {
         if (msg.member.roles.find("name", "Pixel-Admin") || msg.member.roles.find("name", "Pixel-Mod")) {
             console.log("argslength: " + args.length)
@@ -47,19 +43,14 @@ const commands = {
             if (args.length <= 1) {
                 error("Syntax Error", "command: `mod` requires at least one argument.", msg);
                 return;
-            }
-            // else if (args[0] === "") {}
-            else if (args[1] === "purge") {
+            } else if (args[1] === "purge") {
                 if (args.length == 3) {
-
                     if (isNaN(args[2])) {
                         error("Syntax Error", "command: `mod purge` requires the arguments `amount` but `amount` was not equal to an integer.", msg); //
                         return;
                     }
-
                     commandHandler.purge(msg, args, client);
                     return;
-
                 } else {
                     error("Syntax Error", "command: `mod purge` requires the arguments `amount`", msg);
                 }
@@ -72,7 +63,7 @@ const commands = {
                         return;
                     }
                     log("MUTE USER", "User has muted: " + username + " for: " + args[3] + " minutes.", msg);
-                    muteHandler.addMute(msg.mentions.members.first().user.id, args[3], msg.author,  msg.mentions.members.first().user)
+                    muteHandler.addMute(msg.mentions.members.first().user.id, args[3], msg.author, msg.mentions.members.first().user)
                 } else {
                     error("Syntax Error", "command: `mod mute` requires the arguments `user, time (minutes)`", msg);
                 }
@@ -129,7 +120,7 @@ const commands = {
                     msg.channel.send("```" + JSON.stringify(config, null, 4) + "```");
                     config.token = token;
                     token = [];
-                } else if (args[1] === "showmute") { 
+                } else if (args[1] === "showmute") {
                     msg.channel.send("```" + JSON.stringify(mutedUsers, null, 4) + "```");
                 }
             }
@@ -138,12 +129,6 @@ const commands = {
         }
     }
 }
-
-
-
-
-
-
 
 client.on('ready', () => {
     console.log(`Pixel has started, with ${client.users.size} users, in ${client.channels.size} channels of ${client.guilds.size} guild(s) at ${moment().format('MMMM Do YYYY, h:mm:ss a')}`);
