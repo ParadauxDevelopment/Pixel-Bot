@@ -1,6 +1,7 @@
 const Discord = require('discord.js');
 const fs = require("fs");
 const moment = require('moment');
+const _ = require('lodash');
 const config = require('../data/config.json');
 var mutedUsers = require('../data/muted-players.json');
 
@@ -22,8 +23,15 @@ module.exports.checkMuted = function checkMuted(id) {
 	}
 }
 
-module.exports.addMute = function muteUser(userid, time) {
-	mutedUsers[userid] = [new Date, moment(new Date).add(30, 'm').toDate()]
+module.exports.addMute = function muteUser(userid, time, usrobj, mutedusrobj) {
+	mutedUsers[userid] = [new Date, moment(new Date).add(30, 'm').toDate(), usrobj.username, mutedusrobj.username]
 	console.log(mutedUsers);
 	writeMutedPlayers(mutedUsers);
+}
+
+module.exports.removeMute = function unmuteUser(userid) {
+	console.log(mutedUsers);
+	mutedUsers = _.omit(mutedUsers, userid);
+	writeMutedPlayers(mutedUsers);
+	console.log(mutedUsers);
 }

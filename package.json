@@ -4,8 +4,9 @@
   "description": "Lester Bot by ParadauxDev",
   "main": "main.js",
   "dependencies": {
-    "moment": "^2.22.2",
-    "discord.js": "^11.3.2"
+    "discord.js": "^11.3.2",
+    "lodash": "^4.17.10",
+    "moment": "^2.22.2"
   },
   "devDependencies": {},
   "scripts": {

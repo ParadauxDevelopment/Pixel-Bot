@@ -4,7 +4,10 @@ const config = require('./data/config.json');
 const embeds = require('./modules/embeds.js');
 const commandHandler = require('./modules/commands.js');
 const muteHandler = require('./modules/muteCmd.js');
-const configHandler = require('./modules/confighandler.js')
+const mutedUsers = require('./data/muted-players.json')
+const configHandler = require('./modules/confighandler.js');
+const infractions = require('./data/infractions.json');
+const infractionHandler = require('./modules/infractionhandler.js');
 const client = new Discord.Client();
 const muted = {}
 
@@ -25,6 +28,7 @@ function log(type, tbl, msg) {
         .setDescription(tbl);
     msg.channel.send(logEmbed)
     client.channels.get(config.logchannel).send(logEmbed);
+    return true;
 }
 
 const commands = {
@@ -61,16 +65,28 @@ const commands = {
                 }
 
             } else if (args[1] === "mute") {
+                username = msg.mentions.members.first().user.username;
                 if (args.length === 4) {
                     if (isNaN(args[3])) {
                         error("Syntax Error", "command: `mod mute` requires the arguments `time` but `time` was not equal to an integer.", msg); //
                         return;
                     }
-                    username = msg.mentions.members.first().user.username;
                     log("MUTE USER", "User has muted: " + username + " for: " + args[3] + " minutes.", msg);
-                    muteHandler.addMute(msg.mentions.members.first().user.id, args[3])
+                    muteHandler.addMute(msg.mentions.members.first().user.id, args[3], msg.author,  msg.mentions.members.first().user)
                 } else {
                     error("Syntax Error", "command: `mod mute` requires the arguments `user, time (minutes)`", msg);
+                }
+            } else if (args[1] === "unmute") {
+                if (args.length === 3) {
+                    user = msg.mentions.members.first().user
+                    if (muteHandler.checkMuted(user.id)) {
+                        console.log("true")
+                        muteHandler.removeMute(msg.mentions.members.first().user.id);
+                    } else {
+                        error("User Error", "User is not muted.", msg);
+                    }
+                } else {
+                    error("Syntax Error", "command: `mod unmute` requires the arguments `user`", msg);
                 }
             } else {
                 error("Permission Error", "You lack the required permissions for this command.", msg);
@@ -86,8 +102,7 @@ const commands = {
             }
 
             if (args[1] === "exit") {
-                log("ADMIN COMMAND", "Bot terminated.", msg)
-                    .then(() => process.exit());
+                log("ADMIN COMMAND", "Bot terminated.", msg).then(process.exit());
             }
         }
     },
@@ -110,7 +125,7 @@ const commands = {
                     client.channels.get(args[2]).send(listArgs);
                 } else if (args[1] === "setconfigvalue") {
                     config[args[2]] = args[3];
-                    console.log(config);    
+                    console.log(config);
                     configHandler.writeConfig("./data/config.json", config)
                 } else if (args[1] === "showconfig") {
                     token = config.token;
@@ -118,6 +133,8 @@ const commands = {
                     msg.channel.send("```" + JSON.stringify(config, null, 4) + "```");
                     config.token = token;
                     token = [];
+                } else if (args[1] === "showmute") { 
+                    msg.channel.send("```" + JSON.stringify(mutedUsers, null, 4) + "```");
                 }
             }
         } else {
@@ -147,7 +164,7 @@ client.on("guildMemberAdd", (member) => {
 
 client.on('message', msg => {
     var args = msg.content.slice(config.prefix.length).trim().split(/ +/g)
-    if (muteHandler.checkMuted(msg.author.id.toString())) {
+    if (muteHandler.checkMuted(msg.author.id)) {
         msg.delete();
         msg.author.send(embeds.muted1).catch();
     } else {
