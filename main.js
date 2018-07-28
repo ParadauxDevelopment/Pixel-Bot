@@ -1,13 +1,19 @@
 const Discord = require('discord.js');
 const moment = require('moment');
-const config = require('./data/config.json');
+
 const embeds = require('./modules/embeds.js');
 const commandHandler = require('./modules/commands.js');
 const muteHandler = require('./modules/muteCmd.js');
-const mutedUsers = require('./data/muted-players.json')
-const configHandler = require('./modules/confighandler.js');
-const infractions = require('./data/infractions.json');
+const warnHandler = require('./modules/warnCmd.js');
 const infractionHandler = require('./modules/infractionhandler.js');
+const configHandler = require('./modules/confighandler.js');
+const helpMenu = require('./modules/helpmenu.js')
+
+const config = require('./data/config.json');
+const mutedUsers = require('./data/muted-players.json')
+const warnedUsers = require('./data/warnings.json');
+const infractions = require('./data/infractions.json');
+
 const client = new Discord.Client();
 const muted = {}
 
@@ -19,22 +25,47 @@ function error(errtype, errmsg, msg) {
     msg.channel.send(errorEmbed);
 }
 
-function log(type, tbl, msg) {
+function log(type, tbl, msg, anc) {
     logEmbed = new Discord.RichEmbed()
         .setColor(0x4793FF)
         .setAuthor("[" + type + "]: " + msg.author.username + "#" + msg.author.discriminator, msg.author.avatarURL)
         .setDescription(tbl);
-    msg.channel.send(logEmbed)
+    if (anc == false) {} else {
+        msg.channel.send(logEmbed)
+    }
     client.channels.get(config.logchannel).send(logEmbed);
     return true;
 }
 
-const commands = {
-    'info': (msg) => {
+function helpmenu(msg, args) {
+    console.log(args)
+    if (args.length == 1) {
         msg.channel.send(embeds.infoCmd);
+        msg.channel.send("```" + helpMenu.basiccommands + "```")
+    } else if (args[1] === "mod") {
+        if (msg.member.roles.find("name", "Pixel-Admin") || msg.member.roles.find("name", "Pixel-Mod")) {
+            msg.author.send("```" + helpMenu.modcommands + "```")
+            msg.reply("I have sent you all of the moderator commands !")
+        } else {
+            error("Permission Error", "You lack the required permissions for this command.", msg);
+        }
+    } else if (args[1] === "admin") {
+        if (msg.member.roles.find("name", "Pixel-Admin")) {
+            msg.author.send("```" + helpMenu.admincommands + "```")
+            msg.reply("I have sent you all of the administrator commands !")
+        } else {
+            error("Permission Error", "You lack the required permissions for this command.", msg);
+        }
+    }
+}
+
+
+const commands = {
+    'info': (msg, args) => {
+        helpmenu(msg, args);
     },
     'help': (msg, args) => {
-        console.log("hello world!");
+        helpmenu(msg, args);
     },
     'mod': (msg, args) => {
         if (msg.member.roles.find("name", "Pixel-Admin") || msg.member.roles.find("name", "Pixel-Mod")) {
@@ -78,6 +109,23 @@ const commands = {
                 } else {
                     error("Syntax Error", "command: `mod unmute` requires the arguments `user`", msg);
                 }
+            } else if (args[1] === "warn") {
+                if (args.length >= 4) {
+                    var listArgs = "";
+                    for (i = 3; i <= args.length - 1; i++) {
+                        console.log(listArgs)
+                        listArgs = listArgs + " " + (args[i]);
+                    } 
+                    if (!(warnedUsers[msg.mentions.members.first().user.id] instanceof Array)) {
+                        var length = 1
+                    } else {
+                        var legnth = warnedUsers[msg.mentions.members.first().user.id].length
+                    }
+                    log("WARNING", "User has warned: `" + msg.mentions.members.first().user.username + "` for: `" + listArgs + "` Warning Count: `" + length + "`", msg);
+                    warnHandler.addWarning(msg.mentions.members.first().user.id, listArgs);
+                } else {
+                    error("Syntax Error", "command: `mod warn` requires the arguments `user, reason`", msg);
+                }
             } else {
                 error("Permission Error", "You lack the required permissions for this command.", msg);
             }
@@ -92,7 +140,7 @@ const commands = {
             }
 
             if (args[1] === "exit") {
-                log("ADMIN COMMAND", "Bot terminated.", msg).then(process.exit());
+                process.exit();
             }
         }
     },
@@ -124,6 +172,8 @@ const commands = {
                     msg.channel.send("```" + JSON.stringify(mutedUsers, null, 4) + "```");
                 } else if (args[1] === "showinfractions") {
                     msg.channel.send("```" + JSON.stringify(infractions, null, 4) + "```");
+                } else if (args[1] === "showwarnings") {
+                    msg.channel.send("```" + JSON.stringify(warnedUsers, null, 4) + "```");
                 }
             }
         } else {
@@ -143,9 +193,25 @@ client.on('ready', () => {
 client.on("guildMemberAdd", (member) => {
     console.log(`New User "${member.user.username}" has joined "${member.guild.name}"`);
     // Check if they want stats//
+    member.guild.channels.find("name", "👋welcome").send(`Welcome to IcePlex ${member}!`)
+        //member.send(embeds.)
 });
 
 client.on('message', msg => {
+    let nono = config.blacklistedsites
+    if( nono.some(word => msg.content.toLowerCase().includes(word)) ) {
+        if(msg.author.bot) return;
+        if (!(warnedUsers[msg.author.id] instanceof Array)) {
+            var length = 1
+        } else {
+            var legnth = warnedUsers[msg.author.id].length
+        }
+        msg.delete();
+        warnHandler.addWarning(msg.author.id, "Blacklisted Website");
+        log("WARNING", "PixelBot has warned: `" + msg.author.username + "` for: `" + "Blacklisted Website" + "` Warning Count: `" + length + "` Message Content: `" + msg.content + "`", msg);
+    }
+
+
     var args = msg.content.slice(config.prefix.length).trim().split(/ +/g)
     if (muteHandler.checkMuted(msg.author.id)) {
         msg.delete();
@@ -154,6 +220,7 @@ client.on('message', msg => {
         if (!msg.content.startsWith(config.prefix)) return;
         if (commands.hasOwnProperty(msg.content.toLowerCase().slice(config.prefix.length).split(' ')[0])) commands[msg.content.toLowerCase().slice(config.prefix.length).split(' ')[0]](msg, args);
     }
+
 });
 
 client.login(config.token);

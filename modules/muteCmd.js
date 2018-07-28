@@ -14,7 +14,6 @@ function writeMutedPlayers(object) {
             return;
         };
     });
-    console.log("[debug] Config has been re-written");
 } 
 
 module.exports.checkMuted = function checkMuted(id) {
