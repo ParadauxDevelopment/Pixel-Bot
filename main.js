@@ -201,6 +201,7 @@ client.on('message', msg => {
     let nono = config.blacklistedsites
     if( nono.some(word => msg.content.toLowerCase().includes(word)) ) {
         if(msg.author.bot) return;
+        if (msg.member.roles.find("name", "Owner") || msg.member.roles.find("name", "Staff Manager")) return;
         if (!(warnedUsers[msg.author.id] instanceof Array)) {
             var length = 1
         } else {
@@ -208,7 +209,7 @@ client.on('message', msg => {
         }
         msg.delete();
         warnHandler.addWarning(msg.author.id, "Blacklisted Website");
-        log("WARNING", "PixelBot has warned: `" + msg.author.username + "` for: `" + "Blacklisted Website" + "` Warning Count: `" + length + "` Message Content: `" + msg.content + "`", msg);
+        log("WARNING", "PixelBot has warned: `" + msg.author.username + "` for: `" + "Blacklisted Website" + "` Warning Count: `" + length + "` Message Content: `" + msg.content + "`", msg, false);
     }
 
 
