@@ -14,6 +14,10 @@ function writeWarnedPlayers(object) {
     });
 }
 
+module.exports.addWarning = function warningCount(userid) {
+
+}
+
 module.exports.addWarning = function addWarning(userid, reason) {
     console.log(warnedUsers)
     if (!(warnedUsers[userid] instanceof Array)) {

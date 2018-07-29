@@ -19,11 +19,7 @@ function writeMutedPlayers(object) {
 module.exports.checkMuted = function checkMuted(id) {
 	if(mutedUsers.hasOwnProperty(id)) {
 		// If the time has expired on the mute
-
-
-
 		return true;
-
 	} else {
 		return false;
 	}
