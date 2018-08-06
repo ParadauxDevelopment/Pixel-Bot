@@ -153,6 +153,13 @@ const commands = {
             if (args[1] === "exit") {
                 process.exit();
             }
+
+            // 
+            else if (args[1] === "raid") {
+                message.reply("Great.. Welp, here comes the raid protection utility as you requested!")
+                let platform = new RC.Menu(roleAssignment.embedone, roleAssignment.buttons1);
+
+            }
         }
     },
 
