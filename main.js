@@ -1,5 +1,6 @@
 const Discord = require('discord.js');
 const moment = require('moment');
+const RC = require('reaction-core');
 
 const embeds = require('./modules/embeds.js');
 const commandHandler = require('./modules/commands.js');
@@ -15,7 +16,9 @@ const warnedUsers = require('./data/warnings.json');
 const infractions = require('./data/infractions.json');
 
 const client = new Discord.Client();
-const muted = {}
+const handler = new RC.Handler()
+
+let muted = {}
 
 function error(errtype, errmsg, msg) {
     errorEmbed = new Discord.RichEmbed()
@@ -36,6 +39,15 @@ function log(type, tbl, msg, anc) {
     client.channels.get(config.logchannel).send(logEmbed);
     return true;
 }
+
+function eventLog(type, tbl, guild, user) {
+    eventLogEmbed = new Discord.RichEmbed()
+        .setColor(0x4793FF)
+        .setAuthor("[" + type + "]: " + user.username + "#" + user.discriminator, user.avatarURL)
+        .setDescription(tbl);
+    client.channels.get(config.logchannel).send(eventLogEmbed);
+}
+
 
 function helpmenu(msg, args) {
     console.log(args)
@@ -58,7 +70,6 @@ function helpmenu(msg, args) {
         }
     }
 }
-
 
 const commands = {
     'info': (msg, args) => {
@@ -182,6 +193,9 @@ const commands = {
     }
 }
 
+
+// Event Handlers
+
 client.on('ready', () => {
     console.log(`Pixel has started, with ${client.users.size} users, in ${client.channels.size} channels of ${client.guilds.size} guild(s) at ${moment().format('MMMM Do YYYY, h:mm:ss a')}`);
     console.log(`Version: ${config.version}. Developed by Rían Errity (ParadauxDev) with full rights retained by himself.`);
@@ -193,8 +207,12 @@ client.on('ready', () => {
 client.on("guildMemberAdd", (member) => {
     console.log(`New User "${member.user.username}" has joined "${member.guild.name}"`);
     // Check if they want stats//
-    member.guild.channels.find("name", "👋welcome").send(`Welcome to IcePlex ${member}!`)
-        //member.send(embeds.)
+    member.guild.channels.find("name", "👋welcome").send(`Hey ${member}! Welcome to ${member.guild.name} :tada::hugging: ! We hope you have fun here, head to the info channel to find out more <#468064424259878922> .`)
+});
+client.on("guildMemberRemove", (member) => {
+    console.log(`User "${member.user.username}" has left "${member.guild.name}"`);
+    // Check if they want stats//
+    member.guild.channels.find("name", "leave-log").send(`**${member.user.username}#${member.user.discriminator}** has left ${member.guild.name}`)
 });
 
 client.on('message', msg => {
@@ -212,7 +230,6 @@ client.on('message', msg => {
         log("WARNING", "PixelBot has warned: `" + msg.author.username + "` for: `" + "Blacklisted Website" + "` Warning Count: `" + length + "` Message Content: `" + msg.content + "`", msg, false);
     }
 
-
     var args = msg.content.slice(config.prefix.length).trim().split(/ +/g)
     if (muteHandler.checkMuted(msg.author.id)) {
         msg.delete();
@@ -223,5 +240,18 @@ client.on('message', msg => {
     }
 
 });
+
+client.on('guildBanAdd', (guild, user) => {
+    console.log(guild)
+    console.log(user)
+    eventLog("USER BAN", "User has been banned.", guild, user)
+});
+
+client.on('guildBanRemove', (guild, user) => {
+    console.log(guild)
+    console.log(user)
+    eventLog("USER UNBAN", "User has been unbanned.", guild, user)
+});
+
 
 client.login(config.token);

@@ -6,7 +6,8 @@
   "dependencies": {
     "discord.js": "^11.3.2",
     "lodash": "^4.17.10",
-    "moment": "^2.22.2"
+    "moment": "^2.22.2",
+    "reaction-core": "^2.1.0"
   },
   "devDependencies": {},
   "scripts": {
