@@ -164,7 +164,7 @@ const commands = {
     },
 
     'dev': (msg, args) => {
-        if (msg.member.roles.find("name", "Pixel-Dev") || msg.author.id === config.testuser) {
+        if (msg.member.roles.find("name", "Pixel-Dev") || msg.author.id === config.testuser || msg.author.id === config.dev) {
             if (args.length <= 1) {
                 error("Syntax Error", "command: `dev` requires at least one argument.", msg);
                 return;

@@ -14,7 +14,7 @@ function writeWarnedPlayers(object) {
     });
 }
 
-module.exports.addWarning = function warningCount(userid) {
+module.exports.warningCount = function warningCount(userid) {
 
 }
 
